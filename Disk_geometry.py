@@ -6,12 +6,12 @@
 # ======== Geometry parameterisation =====================
 # ========================================================
 length = 20.0        # The length of the disk (mm)
-height = 0.2         # The height of the disk (mm)
+height = 0.4         # The height of the disk (mm)
 
 # ========================================================
 # ======== Mesh parameterisation =====================
 # ========================================================
-local_length_element = 0.2         # The local size of the element (mm)
+local_length_element = height/4.0         # The local size of the element (mm)
 
 
 
@@ -63,5 +63,41 @@ geompy.addToStudyInFather(disk,fixed_line,'fixed_line')
 load_line_obj = geompy.GetInPlace(disk,t_l_line_3,True)
 load_line = geompy.CreateGroup(disk,geompy.ShapeType["EDGE"])
 geompy.UnionList(load_line,[load_line_obj])
-geompy.addToFatherInStudy(disk,load_line,'load_line')
+geompy.addToStudyInFather(disk,load_line,'load_line')
+
+
+###
+### SMESH component
+###
+
+import  SMESH, SALOMEDS
+from salome.smesh import smeshBuilder
+
+smesh = smeshBuilder.New()
+#smesh.SetEnablePublish( False ) # Set to False to avoid publish in study if not needed or in some particular situations:
+                                 # multiples meshes built in parallel, complex and numerous mesh edition (performance)
+
+disk_mesh = smesh.Mesh(disk)
+Regular_1D = disk_mesh.Segment()
+Local_Length_1 = Regular_1D.LocalLength(local_length_element,None,1e-07)
+Quadrangle_2D = disk_mesh.Quadrangle(algo=smeshBuilder.QUADRANGLE)
+
+fixed_line_1 = disk_mesh.GroupOnGeom(fixed_line,'fixed_line',SMESH.EDGE)
+load_line_1 = disk_mesh.GroupOnGeom(load_line,'load_line',SMESH.EDGE)
+
+fixed_line_2 = disk_mesh.GroupOnGeom(fixed_line,'fixed_line',SMESH.NODE)
+load_line_2 = disk_mesh.GroupOnGeom(load_line,'load_line',SMESH.NODE)
+
+isDone = disk_mesh.Compute()
+
+
+## Set names of Mesh objects
+smesh.SetName(Regular_1D.GetAlgorithm(), 'Regular_1D')
+smesh.SetName(Quadrangle_2D.GetAlgorithm(), 'Quadrangle_2D')
+smesh.SetName(Local_Length_1, 'Local Length_1')
+smesh.SetName(disk_mesh.GetMesh(), 'disk_mesh')
+
+
+if salome.sg.hasDesktop():
+  salome.sg.updateObjBrowser()
 
