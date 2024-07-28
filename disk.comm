@@ -6,11 +6,6 @@ nu = 0.25      # Poisson's ratio
 # Displacement Boundary condition
 disp = -0.15
 
-
-
-
-
-
 DEBUT(LANG='EN')
 
 mesh = LIRE_MAILLAGE(UNITE=20)
