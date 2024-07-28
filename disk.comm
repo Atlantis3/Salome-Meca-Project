@@ -19,8 +19,19 @@ model = AFFE_MODELE(AFFE=_F(MODELISATION=('D_PLAN', ),
                             TOUT='OUI'),
                     MAILLAGE=mesh)
 
-Almn = DEFI_MATERIAU(ELAS=_F(E=E,
-                             NU=nu))
+
+stress_s = DEFI_FONCTION(INTERPOL=('LIN', ),
+                         NOM_PARA='EPSI',
+                         NOM_RESU='stress',
+                         PROL_DROITE='CONSTANT',
+                         PROL_GAUCHE='EXCLU',
+                         VALE=(0.1, 7000.0, 0.15, 7000.0, 0.16, 7000.0))
+
+Almn = DEFI_MATERIAU(ELAS=_F(E=70000.0,
+                             NU=0.25),
+                     TRACTION=_F(SIGM=stress_s))
+
+
 
 fieldmat = AFFE_MATERIAU(AFFE=_F(MATER=(Almn, ),
                                  TOUT='OUI'),
