@@ -6,12 +6,12 @@
 # ======== Geometry parameterisation =====================
 # ========================================================
 length = 20.0        # The length of the disk (mm)
-height = 0.4         # The height of the disk (mm)
+height = 10.0         # The height of the disk (mm)
 
 # ========================================================
 # ======== Mesh parameterisation =====================
 # ========================================================
-local_length_element = height/4.0         # The local size of the element (mm)
+local_length_element = height/80.0        # The local size of the element (mm)
 
 
 
