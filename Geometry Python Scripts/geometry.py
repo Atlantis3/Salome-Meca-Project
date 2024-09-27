@@ -10,8 +10,6 @@ wall_radius = 30       # The radius of the curve
 
 
 
-
-
 #------------------------------------------------------------------------------------
 import sys
 import salome
