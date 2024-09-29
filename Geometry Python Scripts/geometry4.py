@@ -4,19 +4,20 @@ import numpy as np
 # ========================================================
 # ======== Geometry parameterisation =====================
 # ========================================================
-unitcell_size = 10.0
-radius = 0.3
+unitcell_size = 10.0      # size of the unit cell
+radius = 0.3              # radius of the strut
 shape_type = 'BCC'
-n_cells_x = 10
-n_cells_y = 4
-n_cells_z = 2
+n_cells_x = 10            # number of cells in x-direction
+n_cells_y = 4             # number of cells in y-direction
+n_cells_z = 2             # number of cells in z-direction
+
+
+
+
 
 #------------------------------------------------------------------------------------
 # Geometry post processing calculations
 strut_length = unitcell_size/(np.sqrt(2))
-
-
-
 import sys
 import salome
 salome.salome_init()
