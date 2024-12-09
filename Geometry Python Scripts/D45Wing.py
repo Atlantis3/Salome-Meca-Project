@@ -27,7 +27,7 @@ for count,value in enumerate (wing_section_x_cordinates_uf):
         #print(value,differance)
         wing_section_x_cordinates.append(differance)
 #3.1 
-wing_section_chord_length = np.array([750,650,500,400,250])
+wing_section_chord_length = np.array([750,650,550,400,250])
 
 # 4. location to dat file for the airfoil profile
 profile_1 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/Wing profiles 20240805/D45-1-132-15-F0-V6.csv',delimiter=',')
