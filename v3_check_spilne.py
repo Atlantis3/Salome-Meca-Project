@@ -138,10 +138,12 @@ geompy.addToStudy(profile_1_face,'profile_1_face')
 s_x_cordinates = [8,4,2,0,2,4,8]
 s_y_cordinates = [4,3,2,0,-2,-3,-4]
 
-spline_all_points = []
-for count,value in enumerate(s_x_cordinates):
-    globals()[f'spline_point_{int(count+1)}'] = geompy.MakeVertex(s_x_cordinates[count],s_y_cordinates[count],0)
-    geompy.addToStudy(globals()[f'spline_point_{int(count+1)}'],'spline_point_'+str(count))
-    spline_all_points.append(globals()[f'spline_point_{int(count+1)}'])
-
-spline = geompy.MakeBezier(spline_all_points,theName='spline')
+pl = geompy.Polyline2D()
+pl.addSection("section 1", GEOM.Interpolation, False)
+points = []
+for count,value in enumerate(profile_1_x_cordinates):
+    points.append(profile_1_x_cordinates[count])
+    points.append(profile_1_y_cordinates[count])
+pl.addPoints(points)
+polyline1 = pl.result(profile_1_face)
+geompy.addToStudy(polyline1,'polyline1')
