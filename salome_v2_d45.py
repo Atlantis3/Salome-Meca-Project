@@ -40,6 +40,14 @@ profile_5 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/new_fla
 profile_6 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/new_flap_cordinates/D45-6-125-17-F10.csv',delimiter=',')
 
 
+# 5. the dimensions for the foam in mm
+foam_length = 2000 
+foam_width = 625
+foam_thickness = 80
+
+
+
+
 '''
 # 4. location to dat file for the airfoil profile for 20 degree flap position
 profile_1 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/Wing Profiles 20241207/D45-1-132-15-F20.csv',delimiter=',')
@@ -198,56 +206,59 @@ geompy.addToStudy(profile_6_polyline,'profile_6_polyline')
 profile_6_face = geompy.MakeFaceWires([profile_6_polyline], 1)
 geompy.addToStudy(profile_6_face,'profile_6_face')
 
-
-
-
-
+# create the wing
 path_1 = geompy.MakePolyline([profile_1_all_points[0],profile_2_all_points[0],profile_3_all_points[0],profile_4_all_points[0],profile_5_all_points[0],profile_6_all_points[0]])
-Wing_1 =  geompy.MakePipeWithDifferentSectionsBySteps([profile_1_face,profile_2_face,profile_3_face,profile_4_face,profile_5_face,profile_6_face],[profile_1_all_points[0],profile_2_all_points[0],profile_3_all_points[0],profile_4_all_points[0],profile_5_all_points[0],profile_6_all_points[0]],path_1)
+wing =  geompy.MakePipeWithDifferentSectionsBySteps([profile_1_face,profile_2_face,profile_3_face,profile_4_face,profile_5_face,profile_6_face],[profile_1_all_points[0],profile_2_all_points[0],profile_3_all_points[0],profile_4_all_points[0],profile_5_all_points[0],profile_6_all_points[0]],path_1)
 geompy.addToStudy(path_1,'path_1')
-geompy.addToStudy(Wing_1,'Wing_1')
+geompy.addToStudy(wing,'wing')
 
 
 
+# calculate the overlapping distance
+overlap_distance = abs(profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]-profile_1_y_cordinates[0])
+box_full_thickness = (2*foam_thickness)-overlap_distance
+box_dist_le = (foam_width-wing_section_chord_length[0])/2.0
+
+le_x_profile1 = np.min(profile_1_x_cordinates)
+le_y_profile1 = profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]
+le_z_profile1 = wing_section_y_cordinates[0]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-# create a big foam for the whole wing
-boxp1 = geompy.MakeVertexWithRef(profile_1_all_points[np.argmin(profile_1_x_cordinates)], -20,-40,0)
-boxp2 = geompy.MakeVertexWithRef(profile_2_all_points[0], 20,140,0)
-foam1 = geompy.MakeBoxTwoPnt(boxp1, boxp2)
-geompy.addToStudy(foam1,'foam1')
+boxp1 = geompy.MakeVertex(le_x_profile1-box_dist_le,le_y_profile1-foam_thickness,le_z_profile1)
+boxp2 = geompy.MakeVertex(le_x_profile1-box_dist_le+foam_width,le_y_profile1-foam_thickness+box_full_thickness,wing_section_y_cordinates[5])
+foam = geompy.MakeBoxTwoPnt(boxp1, boxp2)
+geompy.addToStudy(foam,'foam')
 
 # cut the wing from the foam
-cut1 = geompy.MakeCut(foam1, Wing_1, checkSelfInte=True)
-geompy.addToStudy(cut1,'cut1')
+foam_cut = geompy.MakeCut(foam, wing, checkSelfInte=True)
+geompy.addToStudy(foam_cut,'foam_cut')
+
 
 #create two points rectangles
 y1_for_rect1 = profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]
 
-rect1_point_00 = geompy.MakeVertex(np.min(profile_1_x_cordinates)-100,y1_for_rect1,wing_section_y_cordinates[0])
-rect1_point_01 = geompy.MakeVertex(np.min(profile_1_x_cordinates)-100,y1_for_rect1,wing_section_y_cordinates[1])
+rect1_point_00 = geompy.MakeVertex(np.min(profile_1_x_cordinates)-100-box_dist_le,y1_for_rect1,wing_section_y_cordinates[0])
+rect1_point_01 = geompy.MakeVertex(np.min(profile_1_x_cordinates)-100-box_dist_le,y1_for_rect1,wing_section_y_cordinates[5])
 rect1_point_1 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+10,y1_for_rect1,wing_section_y_cordinates[0])
 rect1_point_2 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+10,y1_for_rect1,wing_section_y_cordinates[1])
+rect1_point_3 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+10,y1_for_rect1,wing_section_y_cordinates[2])
+rect1_point_4 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+10,y1_for_rect1,wing_section_y_cordinates[3])
+rect1_point_5 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+10,y1_for_rect1,wing_section_y_cordinates[4])
+rect1_point_6 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+10,y1_for_rect1,wing_section_y_cordinates[5])
+
+
+
 
 rect1_line1 = geompy.MakeLineTwoPnt(rect1_point_00,rect1_point_1)
 rect1_line2 = geompy.MakeLineTwoPnt(rect1_point_1,rect1_point_2)
-rect1_line3 = geompy.MakeLineTwoPnt(rect1_point_2,rect1_point_01)
-rect1_line4 = geompy.MakeLineTwoPnt(rect1_point_01,rect1_point_00)
+rect1_line3 = geompy.MakeLineTwoPnt(rect1_point_2,rect1_point_3)
+rect1_line4 = geompy.MakeLineTwoPnt(rect1_point_3,rect1_point_4)
+rect1_line5 = geompy.MakeLineTwoPnt(rect1_point_4,rect1_point_5)
+rect1_line6 = geompy.MakeLineTwoPnt(rect1_point_5,rect1_point_6)
+rect1_line7 = geompy.MakeLineTwoPnt(rect1_point_6,rect1_point_01)
+rect1_line8 = geompy.MakeLineTwoPnt(rect1_point_01,rect1_point_00)
 
-rect1 = geompy.MakeFaceWires([rect1_line1,rect1_line2,rect1_line3,rect1_line4],1)
+rect1 = geompy.MakeFaceWires([rect1_line1,rect1_line2,rect1_line3,rect1_line4,rect1_line5,rect1_line6,rect1_line7,rect1_line8],1)
 geompy.addToStudy(rect1,'rect1')
 
 
@@ -255,18 +266,60 @@ geompy.addToStudy(rect1,'rect1')
 #create two points rectangles
 y2_for_rect2 = profile_1_y_cordinates[0]
 
-rect2_point_00 = geompy.MakeVertex(profile_1_x_cordinates[0]+100,y2_for_rect2,wing_section_y_cordinates[0])
-rect2_point_01 = geompy.MakeVertex(profile_1_x_cordinates[0]+100,y2_for_rect2,wing_section_y_cordinates[1])
-rect2_point_1 = geompy.MakeVertex(profile_1_x_cordinates[0],y2_for_rect2,wing_section_y_cordinates[0])
-rect2_point_2 = geompy.MakeVertex(profile_2_x_cordinates[0],profile_2_y_cordinates[0],wing_section_y_cordinates[1])
+'''rect2_point_00 = geompy.MakeVertex(profile_1_x_cordinates[-1]+100+box_dist_le,profile_1_y_cordinates[-1],wing_section_y_cordinates[0])
+rect2_point_01 = geompy.MakeVertex(profile_6_x_cordinates[-1]+100+box_dist_le,profile_6_y_cordinates[-1],wing_section_y_cordinates[5])
+rect2_point_1 = geompy.MakeVertex(profile_1_x_cordinates[-1],profile_1_y_cordinates[-1],wing_section_y_cordinates[0])
+rect2_point_2 = geompy.MakeVertex(profile_2_x_cordinates[-1],profile_2_y_cordinates[-1],wing_section_y_cordinates[1])
+rect2_point_3 = geompy.MakeVertex(profile_3_x_cordinates[-1],profile_3_y_cordinates[-1],wing_section_y_cordinates[2])
+rect2_point_4 = geompy.MakeVertex(profile_4_x_cordinates[-1],profile_4_y_cordinates[-1],wing_section_y_cordinates[3])
+rect2_point_5 = geompy.MakeVertex(profile_5_x_cordinates[-1],profile_5_y_cordinates[-1],wing_section_y_cordinates[4])
+rect2_point_6 = geompy.MakeVertex(profile_6_x_cordinates[-1],profile_6_y_cordinates[-1],wing_section_y_cordinates[5])'''
+
+
+
+rect2_point_00 = geompy.MakeVertex((profile_1_x_cordinates[0]-((profile_1_x_cordinates[0]-profile_1_x_cordinates[-1])/2.0))+100+box_dist_le,profile_1_y_cordinates[0]-,wing_section_y_cordinates[0])
+rect2_point_01 = geompy.MakeVertex(profile_6_x_cordinates[-1]+100+box_dist_le,profile_6_y_cordinates[-1],wing_section_y_cordinates[5])
+rect2_point_1 = geompy.MakeVertex(profile_1_x_cordinates[-1],profile_1_y_cordinates[-1],wing_section_y_cordinates[0])
+rect2_point_2 = geompy.MakeVertex(profile_2_x_cordinates[-1],profile_2_y_cordinates[-1],wing_section_y_cordinates[1])
+rect2_point_3 = geompy.MakeVertex(profile_3_x_cordinates[-1],profile_3_y_cordinates[-1],wing_section_y_cordinates[2])
+rect2_point_4 = geompy.MakeVertex(profile_4_x_cordinates[-1],profile_4_y_cordinates[-1],wing_section_y_cordinates[3])
+rect2_point_5 = geompy.MakeVertex(profile_5_x_cordinates[-1],profile_5_y_cordinates[-1],wing_section_y_cordinates[4])
+rect2_point_6 = geompy.MakeVertex(profile_6_x_cordinates[-1],profile_6_y_cordinates[-1],wing_section_y_cordinates[5])
+
+
+
+
+
+
+
 
 rect2_line1 = geompy.MakeLineTwoPnt(rect2_point_00,rect2_point_1)
 rect2_line2 = geompy.MakeLineTwoPnt(rect2_point_1,rect2_point_2)
-rect2_line3 = geompy.MakeLineTwoPnt(rect2_point_2,rect2_point_01)
-rect2_line4 = geompy.MakeLineTwoPnt(rect2_point_01,rect2_point_00)
+rect2_line3 = geompy.MakeLineTwoPnt(rect2_point_2,rect2_point_3)
+rect2_line4 = geompy.MakeLineTwoPnt(rect2_point_3,rect2_point_4)
+rect2_line5 = geompy.MakeLineTwoPnt(rect2_point_4,rect2_point_5)
+rect2_line6 = geompy.MakeLineTwoPnt(rect2_point_5,rect2_point_6)
+rect2_line7 = geompy.MakeLineTwoPnt(rect2_point_6,rect2_point_01)
+rect2_line8 = geompy.MakeLineTwoPnt(rect2_point_01,rect2_point_00)
 
-rect2 = geompy.MakeFaceWires([rect2_line1,rect2_line2,rect2_line3,rect2_line4],1)
+rect2 = geompy.MakeFaceWires([rect2_line1,rect2_line2,rect2_line3,rect2_line4,rect2_line5,rect2_line6,rect2_line7,rect2_line8],1)
 geompy.addToStudy(rect2,'rect2')
+
+Partition_1 = geompy.MakePartitionNonSelfIntersectedShape([foam_cut], [rect1, rect2], [], [], geompy.ShapeType["SOLID"])
+geompy.addToStudy(Partition_1,'Partition_1')
+[solid1,solid2]= geompy.ExtractShapes(Partition_1, geompy.ShapeType["SOLID"], True)
+geompy.addToStudy(solid1,'Solid_1')
+geompy.addToStudy(solid2,'Solid_2')
+
+
+
+
+'''# create a big foam for the whole wing
+
+
+
+
+
 
 
 
@@ -286,5 +339,4 @@ geompy.addToStudy(rect1,'rect1')
 
 vector2 = geompy.MakeLineTwoPnt(geompy.MakeVertex(profile_1_x_cordinates[0],profile_1_y_cordinates[0],(wing_section_y_cordinates[1]-wing_section_y_cordinates[0])/2.0),geompy.MakeVertex(profile_1_x_cordinates[0],profile_1_y_cordinates[0]+10.0,(wing_section_y_cordinates[1]-wing_section_y_cordinates[0])/2.0))
 rect2 = geompy.MakeFaceObjHW(vector2, wing_section_y_cordinates[1]-wing_section_y_cordinates[0],6)
-geompy.addToStudy(rect2,'rect2')
-'''
+geompy.addToStudy(rect2,'rect2')'''
