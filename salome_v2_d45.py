@@ -379,7 +379,7 @@ geompy.addToStudy(Partition_1,'Partition_1')
 geompy.addToStudy(bottom_foam,'bottom_foam')
 geompy.addToStudy(upper_foam,'upper_foam')
 
-'''# create the pattern for air to escape
+# create the pattern for air to escape
 resin_escape_point_1 = geompy.MakeVertex(profile_1_x_cordinates[1],profile_1_y_cordinates[1],wing_section_y_cordinates[0])
 resin_escape_point_2 = geompy.MakeVertex(profile_1_x_cordinates[0],profile_1_y_cordinates[0],wing_section_y_cordinates[0])
 resin_escape_point_3 = geompy.MakeVertex(profile_1_x_cordinates[0]+15.0,profile_1_y_cordinates[0],wing_section_y_cordinates[0])
@@ -494,4 +494,4 @@ upper_foam_2 = geompy.MakeCutList(upper_foam, [resin_escape])
 #bottom_foam = geompy.MakeCut(upper_foam, resin_escape, checkSelfInte=False)
 geompy.addToStudy(bottom_foam,'bottom_foam')
 geompy.addToStudy(upper_foam,'upper_foam')
-geompy.addToStudy(upper_foam_2,'upper_foam_2')'''
+geompy.addToStudy(upper_foam_2,'upper_foam_2')
