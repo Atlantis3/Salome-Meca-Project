@@ -1,5 +1,6 @@
 # D45 Wing Design; Foambau ADP Winter semester 2024-25
 import numpy as np
+from math import atan2,sin,cos
 
 # ========================================================
 # ======== Geometry parameterisation =====================
@@ -27,8 +28,8 @@ profile_6 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/straigh
 
 # 6. the dimensions for the foam in mm
 foam_length = 2000 
-foam_width = 625
-foam_thickness = 80
+foam_width = 600
+foam_thickness = 60
 
 # 7. Resin Escape path dimensions in mm; The extar length of the wing that you want to create which would later be trimmmed after fabrication of the wing
 resin_escape_length = 10.0
@@ -36,14 +37,25 @@ resin_escape_length = 10.0
 # 8. Fillet radius
 fillet_radius = 2.0
 
-# 9. Faom alignment leading edge length
-foam_align_le_length = 20.0
-faom_align_le_depth = 20.0
-foam_align_le_gap = 40.0
+# 9. Faom alignment cut in the leading edge 
+foam_align_le_length = 20.0     # the length from the resin escape cut to the beginning of the alignment cut
+faom_align_le_depth = 20.0      # the thickness of the cut in a single foam mold
+foam_align_le_gap = 40.0        # the width of the cut or the gap in the cut
 
 foam_align_te_length = 20.0
 faom_align_te_depth = 20.0
 foam_align_te_gap = 40.0
+
+
+# 10. Helping foam mold in the Leading edge
+helping_foam_mold_extra_length = 30.0   # the extra length of the helping foam mold from the alignment cut
+helping_foam_mold_gap_p1 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+helping_foam_mold_gap_p2 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+helping_foam_mold_gap_p3 = 3.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+helping_foam_mold_gap_p4 = 3.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+helping_foam_mold_gap_p5 = 1.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+helping_foam_mold_gap_p6 = 0.8         # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+
 
 #------------------------------------------------------------------------------------
 # Pre calculations for the preparation of the CAD Model
@@ -106,7 +118,7 @@ for count,value in enumerate (profile_1_x_cordinates):
     profile_1_all_points.append(globals()[f'Profile_1_Point_{int(count+1)}'])
     
 profile_1_polyline = geompy.MakePolyline(profile_1_all_points,True)
-geompy.addToStudy(profile_1_polyline,'profile_1_polyline')
+#geompy.addToStudy(profile_1_polyline,'profile_1_polyline')
 
 profile_1_face = geompy.MakeFaceWires([profile_1_polyline], 1)
 geompy.addToStudy(profile_1_face,'profile_1_face')
@@ -119,7 +131,7 @@ for count,value in enumerate (profile_2_x_cordinates):
     profile_2_all_points.append(globals()[f'Profile_2_Point_{int(count+1)}'])
     
 profile_2_polyline = geompy.MakePolyline(profile_2_all_points,True)
-geompy.addToStudy(profile_2_polyline,'profile_2_polyline')
+#geompy.addToStudy(profile_2_polyline,'profile_2_polyline')
 
 profile_2_face = geompy.MakeFaceWires([profile_2_polyline], 1)
 geompy.addToStudy(profile_2_face,'profile_2_face')
@@ -132,7 +144,7 @@ for count,value in enumerate (profile_3_x_cordinates):
     profile_3_all_points.append(globals()[f'Profile_3_Point_{int(count+1)}'])
     
 profile_3_polyline = geompy.MakePolyline(profile_3_all_points,True)
-geompy.addToStudy(profile_3_polyline,'profile_3_polyline')
+#geompy.addToStudy(profile_3_polyline,'profile_3_polyline')
 
 profile_3_face = geompy.MakeFaceWires([profile_3_polyline], 1)
 geompy.addToStudy(profile_3_face,'profile_3_face')
@@ -144,7 +156,7 @@ for count,value in enumerate (profile_4_x_cordinates):
     profile_4_all_points.append(globals()[f'Profile_4_Point_{int(count+1)}'])
     
 profile_4_polyline = geompy.MakePolyline(profile_4_all_points,True)
-geompy.addToStudy(profile_4_polyline,'profile_4_polyline')
+#geompy.addToStudy(profile_4_polyline,'profile_4_polyline')
 
 profile_4_face = geompy.MakeFaceWires([profile_4_polyline], 1)
 geompy.addToStudy(profile_4_face,'profile_4_face')
@@ -158,7 +170,7 @@ for count,value in enumerate (profile_5_x_cordinates):
     profile_5_all_points.append(globals()[f'Profile_5_Point_{int(count+1)}'])
     
 profile_5_polyline = geompy.MakePolyline(profile_5_all_points,True)
-geompy.addToStudy(profile_5_polyline,'profile_5_polyline')
+#geompy.addToStudy(profile_5_polyline,'profile_5_polyline')
 
 profile_5_face = geompy.MakeFaceWires([profile_5_polyline], 1)
 geompy.addToStudy(profile_5_face,'profile_5_face')
@@ -171,7 +183,7 @@ for count,value in enumerate (profile_6_x_cordinates):
     profile_6_all_points.append(globals()[f'Profile_6_Point_{int(count+1)}'])
     
 profile_6_polyline = geompy.MakePolyline(profile_6_all_points,True)
-geompy.addToStudy(profile_6_polyline,'profile_6_polyline')
+#geompy.addToStudy(profile_6_polyline,'profile_6_polyline')
 
 profile_6_face = geompy.MakeFaceWires([profile_6_polyline], 1)
 geompy.addToStudy(profile_6_face,'profile_6_face')
@@ -184,7 +196,7 @@ geompy.addToStudy(wing,'wing')
 
 
 # calculate the overlapping distance and create the foam
-overlap_distance = abs(profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]-profile_1_y_cordinates[0])
+overlap_distance = abs(profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]-(profile_1_y_cordinates[0]-((profile_1_y_cordinates[0]-profile_1_y_cordinates[-1])/2.0)))
 box_full_thickness = (2*foam_thickness)-overlap_distance
 box_dist_le = (foam_width-wing_section_chord_length[0])/2.0
 
@@ -194,13 +206,13 @@ le_z_profile1 = wing_section_y_cordinates[0]
 
 
 boxp1 = geompy.MakeVertex(le_x_profile1-box_dist_le,le_y_profile1-foam_thickness,le_z_profile1)
-boxp2 = geompy.MakeVertex(le_x_profile1-box_dist_le+foam_width,le_y_profile1-foam_thickness+box_full_thickness,wing_section_y_cordinates[5])
+boxp2 = geompy.MakeVertexWithRef(boxp1,foam_width,box_full_thickness,wing_section_y_cordinates[5]-wing_section_y_cordinates[0])
 foam = geompy.MakeBoxTwoPnt(boxp1, boxp2)
-geompy.addToStudy(foam,'foam')
+#geompy.addToStudy(foam,'foam')
 
 # cut the wing from the foam
 foam_cut = geompy.MakeCut(foam, wing, checkSelfInte=True)
-geompy.addToStudy(foam_cut,'foam_cut')
+#geompy.addToStudy(foam_cut,'foam_cut')
 
 
 #create two points rectangles
@@ -228,7 +240,7 @@ rect1_line7 = geompy.MakeLineTwoPnt(rect1_point_6,rect1_point_01)
 rect1_line8 = geompy.MakeLineTwoPnt(rect1_point_01,rect1_point_00)
 
 rect1 = geompy.MakeFaceWires([rect1_line1,rect1_line2,rect1_line3,rect1_line4,rect1_line5,rect1_line6,rect1_line7,rect1_line8],1)
-geompy.addToStudy(rect1,'rect1')
+#geompy.addToStudy(rect1,'rect1')
 
 
 # Partition the foam into two parts
@@ -263,10 +275,10 @@ rect2_line4 = geompy.MakeLineTwoPnt(rect2_point_4,rect2_point_1)
 
 
 rect2 = geompy.MakeFaceWires([rect2_line1,rect2_line2,rect2_line3,rect2_line4],0)
-geompy.addToStudy(rect2,'rect2')
+#geompy.addToStudy(rect2,'rect2')
 
 Partition_1 = geompy.MakePartition([foam_cut], [rect1, rect2])
-geompy.addToStudy(Partition_1,'Partition_1')
+#geompy.addToStudy(Partition_1,'Partition_1')
 [bottom_foam,upper_foam]= geompy.ExtractShapes(Partition_1, geompy.ShapeType["SOLID"], True)
 
 
@@ -339,7 +351,7 @@ upper_foam = geompy.MakeCut(upper_foam, resin_escape_solid, checkSelfInte=True)
 cyl_resin_escape_bf_point = geompy.MakeVertex(profile_1_x_cordinates[-1]+resin_escape_length-fillet_radius,profile_1_y_cordinates[-1],wing_section_y_cordinates[0]+10.0)
 cyl_resin_escape_bf_axis = geompy.MakeLineTwoPnt(cyl_resin_escape_bf_point,geompy.MakeVertex(profile_6_x_cordinates[-1]+resin_escape_length-fillet_radius,profile_6_y_cordinates[-1],wing_section_y_cordinates[5]))
 cylinder_bf_resin_escape = geompy.MakeCylinder(cyl_resin_escape_bf_point, cyl_resin_escape_bf_axis, fillet_radius, wing_section_y_cordinates[0]-wing_section_y_cordinates[5]+100.0)
-geompy.addToStudy(cylinder_bf_resin_escape,'cylinder_bf_resin_escape')
+#geompy.addToStudy(cylinder_bf_resin_escape,'cylinder_bf_resin_escape')
 bottom_foam = geompy.MakeCut(bottom_foam, cylinder_bf_resin_escape, checkSelfInte=True)
 
 
@@ -347,6 +359,37 @@ bottom_foam = geompy.MakeCut(bottom_foam, cylinder_bf_resin_escape, checkSelfInt
 # create a cylinder to make the fillet in the upper foam
 cyl_resin_escape_uf_point = geompy.MakeVertex(profile_1_x_cordinates[0]+resin_escape_length-fillet_radius,profile_1_y_cordinates[0],wing_section_y_cordinates[0]+10.0)
 cyl_resin_escape_uf_axis = geompy.MakeLineTwoPnt(cyl_resin_escape_uf_point,geompy.MakeVertex(profile_6_x_cordinates[0]+resin_escape_length-fillet_radius,profile_6_y_cordinates[0],wing_section_y_cordinates[5]))
+
+
+c_uf_re_c_1_point = geompy.MakeVertex(profile_1_x_cordinates[0]+resin_escape_length-fillet_radius,profile_1_y_cordinates[0],wing_section_y_cordinates[0])
+c_uf_re_c_2_point = geompy.MakeVertex(profile_2_x_cordinates[0]+resin_escape_length-fillet_radius,profile_2_y_cordinates[0],wing_section_y_cordinates[1])
+c_uf_re_c_3_point = geompy.MakeVertex(profile_3_x_cordinates[0]+resin_escape_length-fillet_radius,profile_3_y_cordinates[0],wing_section_y_cordinates[2])
+c_uf_re_c_4_point = geompy.MakeVertex(profile_4_x_cordinates[0]+resin_escape_length-fillet_radius,profile_4_y_cordinates[0],wing_section_y_cordinates[3])
+c_uf_re_c_5_point = geompy.MakeVertex(profile_5_x_cordinates[0]+resin_escape_length-fillet_radius,profile_5_y_cordinates[0],wing_section_y_cordinates[4])
+c_uf_re_c_6_point = geompy.MakeVertex(profile_6_x_cordinates[0]+resin_escape_length-fillet_radius,profile_6_y_cordinates[0],wing_section_y_cordinates[5])
+
+
+
+
+c_uf_re_c_1_vector = geompy.MakeLineTwoPnt(c_uf_re_c_1_point,c_uf_re_c_2_point)
+c_uf_re_c_2_vector = geompy.MakeLineTwoPnt(c_uf_re_c_2_point,c_uf_re_c_3_point)
+c_uf_re_c_3_vector = geompy.MakeLineTwoPnt(c_uf_re_c_3_point,c_uf_re_c_4_point)
+c_uf_re_c_4_vector = geompy.MakeLineTwoPnt(c_uf_re_c_4_point,c_uf_re_c_5_point)
+c_uf_re_c_5_vector = geompy.MakeLineTwoPnt(c_uf_re_c_5_point,c_uf_re_c_6_point)
+c_uf_re_c_6_vector = geompy.MakeLineTwoPnt(c_uf_re_c_6_point,c_uf_re_c_1_point)
+
+
+
+
+
+cyl_uf_resin_escape_circle_1 = geompy.MakeCircle(c_uf_re_c_1_point,c_uf_re_c_1_vector,fillet_radius)
+cyl_uf_resin_escape_circle_2 = geompy.MakeCircle(c_uf_re_c_2_point,c_uf_re_c_2_vector,fillet_radius)
+cyl_uf_resin_escape_circle_3 = geompy.MakeCircle(c_uf_re_c_3_point,c_uf_re_c_3_vector,fillet_radius)
+cyl_uf_resin_escape_circle_4 = geompy.MakeCircle(c_uf_re_c_4_point,c_uf_re_c_4_vector,fillet_radius)
+cyl_uf_resin_escape_circle_5 = geompy.MakeCircle(c_uf_re_c_5_point,c_uf_re_c_5_vector,fillet_radius)
+cyl_uf_resin_escape_circle_6 = geompy.MakeCircle(c_uf_re_c_6_point,c_uf_re_c_6_vector,fillet_radius)
+
+
 
 
 cylinder_uf_resin_escape = geompy.MakeCylinder(cyl_resin_escape_uf_point, cyl_resin_escape_uf_axis, fillet_radius, wing_section_y_cordinates[0]-wing_section_y_cordinates[5]+100.0)
@@ -368,7 +411,7 @@ foam_align_le_polyline = geompy.MakePolyline([foam_align_le_point_1,foam_align_l
 foam_align_le_face = geompy.MakeFaceWires([foam_align_le_polyline],True)
 
 foam_align_le = geompy.MakePrismVecH(foam_align_le_face, OZ, wing_section_y_cordinates[5]-wing_section_y_cordinates[0]-100.0)
-geompy.addToStudy(foam_align_le,'foam_align_le')
+#geompy.addToStudy(foam_align_le,'foam_align_le')
 
 bottom_foam = geompy.MakeCut(bottom_foam, foam_align_le, checkSelfInte=True)
 
@@ -428,8 +471,8 @@ cyl_te_lf_2 = geompy.MakeCylinder(cyl_te_lf_2_point, OZ, fillet_radius, wing_sec
 bottom_foam = geompy.MakeCutList(bottom_foam, [cyl_le_lf_1,cyl_le_lf_2,cyl_te_lf_1,cyl_te_lf_2], checkSelfInte=True)
 upper_foam = geompy.MakeCutList(upper_foam, [cyl_le_uf_1,cyl_le_uf_2,cyl_te_uf_1,cyl_te_uf_2], checkSelfInte=True)
 
-geompy.addToStudy(bottom_foam,'bottom_foam')
-geompy.addToStudy(upper_foam,'upper_foam')
+#geompy.addToStudy(bottom_foam,'bottom_foam')
+#geompy.addToStudy(upper_foam,'upper_foam')
 
 
 # make the cutting plane for dividing the foam molds
@@ -437,7 +480,7 @@ dividing_plane_point_1 = geompy.MakeVertex(wing_section_chord_length[0]/2.0,0,wi
 dividing_plane_point_2 = geompy.MakeVertex(wing_section_chord_length[0]/2.0,0,wing_section_y_cordinates[0]-1000.0)
 
 dividing_plane = geompy.MakeFaceObjHW(geompy.MakeLineTwoPnt(dividing_plane_point_1,dividing_plane_point_2), 1.50*foam_width, foam_thickness*2*1.50)
-geompy.addToStudy(dividing_plane,'dividing_plane')
+#geompy.addToStudy(dividing_plane,'dividing_plane')
 
 
 
@@ -453,3 +496,146 @@ geompy.addToStudy(mold_1_upper_foam_section_1,'mold_1_upper_foam_section_1')
 geompy.addToStudy(mold_2_upper_foam_section_2,'mold_2_upper_foam_section_2')
 geompy.addToStudy(mold_3_bottom_foam_section_1,'mold_3_bottom_foam_section_1')
 geompy.addToStudy(mold_4_bottom_foam_section_2,'mold_4_bottom_foam_section_2')
+
+# making the helping foam mold for the leading edge
+
+
+# define a function that takes in the ratio and outputs the argument where the helping foam molds begins
+
+def get_arguments(x_cordinates,chord_length,ratio):
+    min_x = np.min(x_cordinates)
+    length = chord_length*ratio
+    desired_x = min_x+length
+    
+    for count,value in enumerate(x_cordinates):
+        if value > desired_x:
+            pass
+        else :
+            arg_first = count
+            break
+
+    return arg_first,np.argmin(x_cordinates)
+
+
+
+def calculate_offset_point(Ax, Ay, Bx, By, Cx, Cy, offset_distance):
+    angle1 = atan2((By-Ay),(Bx-Ax))
+    angle2 = atan2((Cy-By),(Cx-Bx))
+    half_angle = ((np.pi)+angle1-angle2)/2.0
+    mid_vector_length = offset_distance/sin(half_angle)
+    other_angle = half_angle-angle1
+    dx = mid_vector_length*sin(other_angle)
+    dy = mid_vector_length*cos(other_angle)
+    return (Bx+dx,By-dy)
+
+
+def get_polyline_points (first_arg,second_arg,all_points,gap,thick_y_cordinate,width_x_cordinate,z_cordinate,factor):
+    help_line_points = all_points[first_arg:second_arg]
+    offset_list = np.linspace(gap,0.0,np.size(help_line_points))
+    polyline_points = []
+
+    
+
+    for count,point in enumerate(help_line_points):
+        if count == 0 :
+            pass
+        elif count == np.size(help_line_points)-1:
+            polyline_points.append(geompy.MakeVertex(geompy.PointCoordinates(point)[0],geompy.PointCoordinates(point)[1],geompy.PointCoordinates(point)[2]))
+        else:
+
+            Ax = geompy.PointCoordinates(help_line_points[count-1])[0]
+            Ay = geompy.PointCoordinates(help_line_points[count-1])[1]
+            Bx = geompy.PointCoordinates(help_line_points[count])[0]
+            By = geompy.PointCoordinates(help_line_points[count])[1]
+            Cx = geompy.PointCoordinates(help_line_points[count+1])[0]
+            Cy = geompy.PointCoordinates(help_line_points[count+1])[1]
+            offset_distance = offset_list[count]
+
+            angle1 = atan2((By-Ay),(Bx-Ax))
+            angle2 = atan2((Cy-By),(Cx-Bx))
+            half_angle = ((np.pi)+angle1-angle2)/2.0
+            mid_vector_length = offset_distance/sin(half_angle)
+            other_angle = half_angle-angle1
+            dx = mid_vector_length*sin(other_angle)
+            dy = mid_vector_length*cos(other_angle)
+            x = Bx-factor*dx
+            y = By+factor*dy
+               
+
+            polyline_points.append(geompy.MakeVertex(x,y,z_cordinate))
+
+    polyline_points.append(geompy.MakeVertex(width_x_cordinate,geompy.PointCoordinates(point)[1],z_cordinate))
+    polyline_points.append(geompy.MakeVertex(width_x_cordinate,thick_y_cordinate,z_cordinate))
+    polyline_points.append(geompy.MakeVertex(geompy.PointCoordinates(polyline_points[0])[0],thick_y_cordinate,z_cordinate))
+    return polyline_points
+
+
+
+# Arguments for the helping foam
+hf_width_x_cordinate = np.min(profile_1_x_cordinates)-foam_align_le_length-helping_foam_mold_extra_length-foam_align_le_gap
+hf_high_y_cordinate = geompy.PointCoordinates(boxp2)[1]
+
+# create the polyline and then just make them visible to the study
+p1_first_arg,p1_second_arg = get_arguments(profile_1_x_cordinates,wing_section_chord_length[0],0.15)
+
+p1_polyline_points = get_polyline_points(p1_first_arg,p1_second_arg+1,profile_1_all_points,helping_foam_mold_gap_p1,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[0],2.0)
+p1_polyline = geompy.MakePolyline(p1_polyline_points,True)
+geompy.addToStudy(p1_polyline,'p1_polyline')
+
+
+# create the polyline and then just make them visible to the study
+p2_first_arg,p2_second_arg = get_arguments(profile_2_x_cordinates,wing_section_chord_length[1],0.15)
+
+p2_polyline_points = get_polyline_points(p2_first_arg,p2_second_arg+1,profile_2_all_points,helping_foam_mold_gap_p2,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[1],2.0)
+p2_polyline = geompy.MakePolyline(p2_polyline_points,True)
+geompy.addToStudy(p2_polyline,'p2_polyline')
+
+# create the polyline and then just make them visible to the study
+p3_first_arg,p3_second_arg = get_arguments(profile_3_x_cordinates,wing_section_chord_length[2],0.14)
+
+p3_polyline_points = get_polyline_points(p3_first_arg,p3_second_arg+1,profile_3_all_points,helping_foam_mold_gap_p3,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[2],2.0)
+p3_polyline = geompy.MakePolyline(p3_polyline_points,True)
+geompy.addToStudy(p3_polyline,'p3_polyline')
+
+# create the polyline and then just make them visible to the study
+p4_first_arg,p4_second_arg = get_arguments(profile_4_x_cordinates,wing_section_chord_length[3],0.14)
+
+p4_polyline_points = get_polyline_points(p4_first_arg,p4_second_arg+1,profile_4_all_points,helping_foam_mold_gap_p4,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[3],2.0)
+p4_polyline = geompy.MakePolyline(p4_polyline_points,True)
+geompy.addToStudy(p4_polyline,'p4_polyline')
+
+
+# create the polyline and then just make them visible to the study
+p5_first_arg,p5_second_arg = get_arguments(profile_5_x_cordinates,wing_section_chord_length[4],0.11)
+
+p5_polyline_points = get_polyline_points(p5_first_arg,p5_second_arg+1,profile_5_all_points,helping_foam_mold_gap_p5,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[4],2.0)
+p5_polyline = geompy.MakePolyline(p5_polyline_points,True)
+geompy.addToStudy(p5_polyline,'p5_polyline')
+
+
+# create the polyline and then just make them visible to the study
+p6_first_arg,p6_second_arg = get_arguments(profile_6_x_cordinates,wing_section_chord_length[5],0.07)
+
+p6_polyline_points = get_polyline_points(p6_first_arg-1,p6_second_arg,profile_6_all_points,helping_foam_mold_gap_p6,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[5],2.0)
+p6_polyline = geompy.MakePolyline(p6_polyline_points,True)
+geompy.addToStudy(p6_polyline,'p6_polyline')
+
+
+helping_foam_mold = geompy.MakeThruSections([p1_polyline,p2_polyline,p3_polyline,p4_polyline,p5_polyline,p6_polyline],1,1e-8,1)
+
+print(np.size(p1_polyline_points))
+print(np.size(p2_polyline_points))
+print(np.size(p3_polyline_points))
+print(np.size(p4_polyline_points))
+print(np.size(p5_polyline_points))
+print(np.size(p6_polyline_points))
+
+helping_foam_mold = geompy.MakeCutList(helping_foam_mold, [foam_align_le,cyl_le_uf_1,cyl_le_uf_2], checkSelfInte=True)
+geompy.addToStudy(helping_foam_mold,'helping_foam_mold')
+
+
+helping_foam_mold_partition = geompy.MakePartition([helping_foam_mold], [dividing_plane])
+[mold_6_helping_foam_section_2,mold_5_helping_foam_section_1] = geompy.ExtractShapes(helping_foam_mold_partition, geompy.ShapeType["SOLID"], True)
+geompy.addToStudy(mold_5_helping_foam_section_1,'mold_5_helping_foam_section_1')
+geompy.addToStudy(mold_6_helping_foam_section_2,'mold_6_helping_foam_section_2')
+
