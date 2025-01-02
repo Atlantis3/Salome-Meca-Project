@@ -624,12 +624,6 @@ geompy.addToStudy(p6_polyline,'p6_polyline')
 
 helping_foam_mold = geompy.MakeThruSections([p1_polyline,p2_polyline,p3_polyline,p4_polyline,p5_polyline,p6_polyline],1,1e-8,1)
 
-print(np.size(p1_polyline_points))
-print(np.size(p2_polyline_points))
-print(np.size(p3_polyline_points))
-print(np.size(p4_polyline_points))
-print(np.size(p5_polyline_points))
-print(np.size(p6_polyline_points))
 
 helping_foam_mold = geompy.MakeCutList(helping_foam_mold, [foam_align_le,cyl_le_uf_1,cyl_le_uf_2], checkSelfInte=True)
 #geompy.addToStudy(helping_foam_mold,'helping_foam_mold')
@@ -700,7 +694,7 @@ helping_foam_mold = geompy.MakeCutList(helping_foam_mold, [hf_rec_solid,hf_botto
 
 
 helping_foam_mold_partition = geompy.MakePartition([helping_foam_mold], [dividing_plane])
-[mold_6_helping_foam_section_2,mold_5_helping_foam_section_1] = geompy.ExtractShapes(helping_foam_mold_partition, geompy.ShapeType["SOLID"], True)
+[mold_5_helping_foam_section_1,mold_6_helping_foam_section_2] = geompy.ExtractShapes(helping_foam_mold_partition, geompy.ShapeType["SOLID"], True)
 geompy.addToStudy(mold_5_helping_foam_section_1,'mold_5_helping_foam_section_1')
 geompy.addToStudy(mold_6_helping_foam_section_2,'mold_6_helping_foam_section_2')
 
