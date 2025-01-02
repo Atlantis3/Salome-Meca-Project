@@ -50,11 +50,12 @@ foam_align_te_gap = 40.0
 # 10. Helping foam mold in the Leading edge
 helping_foam_mold_extra_length = 30.0   # the extra length of the helping foam mold from the alignment cut
 helping_foam_mold_gap_p1 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
-helping_foam_mold_gap_p2 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
-helping_foam_mold_gap_p3 = 3.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
-helping_foam_mold_gap_p4 = 3.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
-helping_foam_mold_gap_p5 = 1.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
-helping_foam_mold_gap_p6 = 0.8         # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+helping_foam_mold_gap_p2 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 2
+helping_foam_mold_gap_p3 = 3.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 3
+helping_foam_mold_gap_p4 = 3.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 4
+helping_foam_mold_gap_p5 = 1.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 5
+helping_foam_mold_gap_p6 = 0.8          # the maximum gap between the helping foam mold and the upper foam mold for profile 6
+helping_foam_mold_ratio = 0.10          # perecetange of chord length used for helping foam mold
 
 
 #------------------------------------------------------------------------------------
@@ -514,7 +515,7 @@ def get_arguments(x_cordinates,chord_length,ratio):
             arg_first = count
             break
 
-    return arg_first,np.argmin(x_cordinates)
+    return np.argmin(x_cordinates)-30,np.argmin(x_cordinates)
 
 
 
@@ -586,7 +587,7 @@ geompy.addToStudy(p1_polyline,'p1_polyline')
 # create the polyline and then just make them visible to the study
 p2_first_arg,p2_second_arg = get_arguments(profile_2_x_cordinates,wing_section_chord_length[1],0.15)
 
-p2_polyline_points = get_polyline_points(p2_first_arg,p2_second_arg+1,profile_2_all_points,helping_foam_mold_gap_p2,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[1],2.0)
+p2_polyline_points = get_polyline_points(p2_first_arg+1,p2_second_arg+2,profile_2_all_points,helping_foam_mold_gap_p2,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[1],2.0)
 p2_polyline = geompy.MakePolyline(p2_polyline_points,True)
 geompy.addToStudy(p2_polyline,'p2_polyline')
 
@@ -600,7 +601,7 @@ geompy.addToStudy(p3_polyline,'p3_polyline')
 # create the polyline and then just make them visible to the study
 p4_first_arg,p4_second_arg = get_arguments(profile_4_x_cordinates,wing_section_chord_length[3],0.14)
 
-p4_polyline_points = get_polyline_points(p4_first_arg,p4_second_arg+1,profile_4_all_points,helping_foam_mold_gap_p4,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[3],2.0)
+p4_polyline_points = get_polyline_points(p4_first_arg+1,p4_second_arg+2,profile_4_all_points,helping_foam_mold_gap_p4,hf_high_y_cordinate,hf_width_x_cordinate,wing_section_y_cordinates[3],2.0)
 p4_polyline = geompy.MakePolyline(p4_polyline_points,True)
 geompy.addToStudy(p4_polyline,'p4_polyline')
 
@@ -631,7 +632,71 @@ print(np.size(p5_polyline_points))
 print(np.size(p6_polyline_points))
 
 helping_foam_mold = geompy.MakeCutList(helping_foam_mold, [foam_align_le,cyl_le_uf_1,cyl_le_uf_2], checkSelfInte=True)
-geompy.addToStudy(helping_foam_mold,'helping_foam_mold')
+#geompy.addToStudy(helping_foam_mold,'helping_foam_mold')
+
+
+
+# create the rectangles for cutting the extra helping foam mold
+
+# define a function to make rectangle from two points
+def MakeRectTwoPnt(point1,point2):
+    
+    point1_x = geompy.PointCoordinates(point1)[0]
+    point1_y = geompy.PointCoordinates(point1)[1]
+    point1_z = geompy.PointCoordinates(point1)[2]
+
+    point2_x = geompy.PointCoordinates(point2)[0]
+    point2_y = geompy.PointCoordinates(point2)[1]
+    point2_z = geompy.PointCoordinates(point2)[2]
+    
+    point3 = geompy.MakeVertex(point1_x,point2_y,point2_z)
+    point4 = geompy.MakeVertex(point2_x,point1_y,point1_z)
+
+    rect_polyline = geompy.MakePolyline([point1,point3,point2,point4],True)
+    return rect_polyline
+
+
+
+# make 6 rectangles for the cutting the profile
+hf_p1_rec_point_1 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+(wing_section_chord_length[0]*helping_foam_mold_ratio),profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)],wing_section_y_cordinates[0])
+hf_p1_rec_point_2 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+(wing_section_chord_length[0]*helping_foam_mold_ratio*5),profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]+foam_thickness,wing_section_y_cordinates[0])
+hf_p1_rec = MakeRectTwoPnt(hf_p1_rec_point_1,hf_p1_rec_point_2)
+
+
+hf_p2_rec_point_1 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+(wing_section_chord_length[1]*helping_foam_mold_ratio),profile_2_y_cordinates[np.argmin(profile_2_x_cordinates)],wing_section_y_cordinates[1])
+hf_p2_rec_point_2 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+(wing_section_chord_length[1]*helping_foam_mold_ratio*5),profile_2_y_cordinates[np.argmin(profile_2_x_cordinates)]+foam_thickness,wing_section_y_cordinates[1])
+hf_p2_rec = MakeRectTwoPnt(hf_p2_rec_point_1,hf_p2_rec_point_2)
+
+hf_p3_rec_point_1 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+(wing_section_chord_length[2]*helping_foam_mold_ratio),profile_3_y_cordinates[np.argmin(profile_3_x_cordinates)],wing_section_y_cordinates[2])
+hf_p3_rec_point_2 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+(wing_section_chord_length[2]*helping_foam_mold_ratio*5),profile_3_y_cordinates[np.argmin(profile_3_x_cordinates)]+foam_thickness,wing_section_y_cordinates[2])
+hf_p3_rec = MakeRectTwoPnt(hf_p3_rec_point_1,hf_p3_rec_point_2)
+
+hf_p4_rec_point_1 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+(wing_section_chord_length[3]*helping_foam_mold_ratio),profile_4_y_cordinates[np.argmin(profile_4_x_cordinates)],wing_section_y_cordinates[3])
+hf_p4_rec_point_2 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+(wing_section_chord_length[3]*helping_foam_mold_ratio*5),profile_4_y_cordinates[np.argmin(profile_4_x_cordinates)]+foam_thickness,wing_section_y_cordinates[3])
+hf_p4_rec = MakeRectTwoPnt(hf_p4_rec_point_1,hf_p4_rec_point_2)
+
+hf_p5_rec_point_1 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+(wing_section_chord_length[4]*helping_foam_mold_ratio),profile_5_y_cordinates[np.argmin(profile_5_x_cordinates)],wing_section_y_cordinates[4])
+hf_p5_rec_point_2 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+(wing_section_chord_length[4]*helping_foam_mold_ratio*5),profile_5_y_cordinates[np.argmin(profile_5_x_cordinates)]+foam_thickness,wing_section_y_cordinates[4])
+hf_p5_rec = MakeRectTwoPnt(hf_p5_rec_point_1,hf_p5_rec_point_2)
+
+hf_p6_rec_point_1 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+(wing_section_chord_length[5]*helping_foam_mold_ratio),profile_6_y_cordinates[np.argmin(profile_6_x_cordinates)],wing_section_y_cordinates[5])
+hf_p6_rec_point_2 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+(wing_section_chord_length[5]*helping_foam_mold_ratio*5),profile_6_y_cordinates[np.argmin(profile_6_x_cordinates)]+foam_thickness,wing_section_y_cordinates[5])
+hf_p6_rec = MakeRectTwoPnt(hf_p6_rec_point_1,hf_p6_rec_point_2)
+
+
+
+
+hf_rec_solid = geompy.MakeThruSections([hf_p1_rec,hf_p2_rec,hf_p3_rec,hf_p4_rec,hf_p5_rec,hf_p6_rec],1,1e-8,1)
+#geompy.addToStudy(hf_rec_solid,'hf_rec_solid')
+
+# rectangel to make the bottom part flat
+hf_bottom_rec_point_1 = geompy.MakeVertex(np.min(profile_1_x_cordinates)-foam_width,y1_for_rect1-foam_thickness,wing_section_y_cordinates[5])
+hf_bottom_rec_point_2 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+10.0,y1_for_rect1,wing_section_y_cordinates[0])
+hf_bottom_rec_solid = geompy.MakeBoxTwoPnt(hf_bottom_rec_point_1,hf_bottom_rec_point_2)
+#geompy.addToStudy(hf_bottom_rec_solid,'hf_bottom_rec_soilid')
+
+
+helping_foam_mold = geompy.MakeCutList(helping_foam_mold, [hf_rec_solid,hf_bottom_rec_solid], checkSelfInte=True)
 
 
 helping_foam_mold_partition = geompy.MakePartition([helping_foam_mold], [dividing_plane])
