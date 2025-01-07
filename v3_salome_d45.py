@@ -17,7 +17,7 @@ wing_section_x_cordinates = np.array([0.0,0.014025,0.10489,0.214318,0.3234744,0.
 # 4. The length of the chordline of the profile in mm
 wing_section_chord_length = np.array([0.7319,0.7154,0.6085,0.4826,0.3568,0.2309])*1000.0/2.0
 
-# 5. location to dat file for the airfoil profile for 0 degree flap position
+# 5. The location to csv file for the airfoil profiles
 profile_1 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/straight_te_flap_trim_cordinates/D45-1-132-15-trim_straight_te.csv',delimiter=',')
 profile_2 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/straight_te_flap_trim_cordinates/D45-2-132-15-trim_straight_te.csv',delimiter=',')
 profile_3 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/straight_te_flap_trim_cordinates/D45-3-131-15-trim_straight_te.csv',delimiter=',')
@@ -26,18 +26,18 @@ profile_5 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/straigh
 profile_6 = np.loadtxt('/home/akram_metar/D_Drive/Akaflieg/D45 Wing Data/straight_te_flap_trim_cordinates/D45-6-125-17-trim_straight_te.csv',delimiter=',')
 
 
-# 6. the dimensions for the foam in mm
+# 6. The dimensions of the foam in mm
 foam_length = 2000 
 foam_width = 600
 foam_thickness = 60
 
-# 7. Resin Escape path dimensions in mm; The extar length of the wing that you want to create which would later be trimmmed after fabrication of the wing
-resin_escape_length = 10.0
+# 7. Resin Escape path dimensions in mm; The extra length of the wing that you want to create which would later be trimmmed after fabrication of the wing
+resin_escape_length = 25.0
 
 # 8. Fillet radius
 fillet_radius = 2.0
 
-# 9. Faom alignment cut in the leading edge 
+# 9. Foam alignment cut in the leading edge 
 foam_align_le_length = 20.0     # the length from the resin escape cut to the beginning of the alignment cut
 faom_align_le_depth = 20.0      # the thickness of the cut in a single foam mold
 foam_align_le_gap = 40.0        # the width of the cut or the gap in the cut
@@ -49,13 +49,20 @@ foam_align_te_gap = 40.0
 
 # 10. Helping foam mold in the Leading edge
 helping_foam_mold_extra_length = 30.0   # the extra length of the helping foam mold from the alignment cut
-helping_foam_mold_gap_p1 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
+
+helping_foam_mold_gap_p1 = 2.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 1
 helping_foam_mold_gap_p2 = 4.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 2
 helping_foam_mold_gap_p3 = 3.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 3
 helping_foam_mold_gap_p4 = 3.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 4
-helping_foam_mold_gap_p5 = 1.5          # the maximum gap between the helping foam mold and the upper foam mold for profile 5
-helping_foam_mold_gap_p6 = 0.8          # the maximum gap between the helping foam mold and the upper foam mold for profile 6
-helping_foam_mold_ratio = 0.10          # perecetange of chord length used for helping foam mold
+helping_foam_mold_gap_p5 = 2.0          # the maximum gap between the helping foam mold and the upper foam mold for profile 5
+helping_foam_mold_gap_p6 = 1.2          # the maximum gap between the helping foam mold and the upper foam mold for profile 6
+
+helping_foam_mold_ratio_p1 = 0.08          # perecetange of chord length used for helping foam mold profile 1
+helping_foam_mold_ratio_p2 = 0.09          # perecetange of chord length used for helping foam mold profile 1
+helping_foam_mold_ratio_p3 = 0.10          # perecetange of chord length used for helping foam mold profile 1
+helping_foam_mold_ratio_p4 = 0.11          # perecetange of chord length used for helping foam mold profile 1
+helping_foam_mold_ratio_p5 = 0.12          # perecetange of chord length used for helping foam mold profile 1
+helping_foam_mold_ratio_p6 = 0.13          # perecetange of chord length used for helping foam mold profile 1
 
 
 #------------------------------------------------------------------------------------
@@ -652,29 +659,29 @@ def MakeRectTwoPnt(point1,point2):
 
 
 # make 6 rectangles for the cutting the profile
-hf_p1_rec_point_1 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+(wing_section_chord_length[0]*helping_foam_mold_ratio),profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)],wing_section_y_cordinates[0])
-hf_p1_rec_point_2 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+(wing_section_chord_length[0]*helping_foam_mold_ratio*5),profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]+foam_thickness,wing_section_y_cordinates[0])
+hf_p1_rec_point_1 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+(wing_section_chord_length[0]*helping_foam_mold_ratio_p1),profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)],wing_section_y_cordinates[0])
+hf_p1_rec_point_2 = geompy.MakeVertex(np.min(profile_1_x_cordinates)+(wing_section_chord_length[0]*helping_foam_mold_ratio_p1*5),profile_1_y_cordinates[np.argmin(profile_1_x_cordinates)]+foam_thickness,wing_section_y_cordinates[0])
 hf_p1_rec = MakeRectTwoPnt(hf_p1_rec_point_1,hf_p1_rec_point_2)
 
 
-hf_p2_rec_point_1 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+(wing_section_chord_length[1]*helping_foam_mold_ratio),profile_2_y_cordinates[np.argmin(profile_2_x_cordinates)],wing_section_y_cordinates[1])
-hf_p2_rec_point_2 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+(wing_section_chord_length[1]*helping_foam_mold_ratio*5),profile_2_y_cordinates[np.argmin(profile_2_x_cordinates)]+foam_thickness,wing_section_y_cordinates[1])
+hf_p2_rec_point_1 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+(wing_section_chord_length[1]*helping_foam_mold_ratio_p2),profile_2_y_cordinates[np.argmin(profile_2_x_cordinates)],wing_section_y_cordinates[1])
+hf_p2_rec_point_2 = geompy.MakeVertex(np.min(profile_2_x_cordinates)+(wing_section_chord_length[1]*helping_foam_mold_ratio_p2*5),profile_2_y_cordinates[np.argmin(profile_2_x_cordinates)]+foam_thickness,wing_section_y_cordinates[1])
 hf_p2_rec = MakeRectTwoPnt(hf_p2_rec_point_1,hf_p2_rec_point_2)
 
-hf_p3_rec_point_1 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+(wing_section_chord_length[2]*helping_foam_mold_ratio),profile_3_y_cordinates[np.argmin(profile_3_x_cordinates)],wing_section_y_cordinates[2])
-hf_p3_rec_point_2 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+(wing_section_chord_length[2]*helping_foam_mold_ratio*5),profile_3_y_cordinates[np.argmin(profile_3_x_cordinates)]+foam_thickness,wing_section_y_cordinates[2])
+hf_p3_rec_point_1 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+(wing_section_chord_length[2]*helping_foam_mold_ratio_p3),profile_3_y_cordinates[np.argmin(profile_3_x_cordinates)],wing_section_y_cordinates[2])
+hf_p3_rec_point_2 = geompy.MakeVertex(np.min(profile_3_x_cordinates)+(wing_section_chord_length[2]*helping_foam_mold_ratio_p3*5),profile_3_y_cordinates[np.argmin(profile_3_x_cordinates)]+foam_thickness,wing_section_y_cordinates[2])
 hf_p3_rec = MakeRectTwoPnt(hf_p3_rec_point_1,hf_p3_rec_point_2)
 
-hf_p4_rec_point_1 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+(wing_section_chord_length[3]*helping_foam_mold_ratio),profile_4_y_cordinates[np.argmin(profile_4_x_cordinates)],wing_section_y_cordinates[3])
-hf_p4_rec_point_2 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+(wing_section_chord_length[3]*helping_foam_mold_ratio*5),profile_4_y_cordinates[np.argmin(profile_4_x_cordinates)]+foam_thickness,wing_section_y_cordinates[3])
+hf_p4_rec_point_1 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+(wing_section_chord_length[3]*helping_foam_mold_ratio_p4),profile_4_y_cordinates[np.argmin(profile_4_x_cordinates)],wing_section_y_cordinates[3])
+hf_p4_rec_point_2 = geompy.MakeVertex(np.min(profile_4_x_cordinates)+(wing_section_chord_length[3]*helping_foam_mold_ratio_p4*5),profile_4_y_cordinates[np.argmin(profile_4_x_cordinates)]+foam_thickness,wing_section_y_cordinates[3])
 hf_p4_rec = MakeRectTwoPnt(hf_p4_rec_point_1,hf_p4_rec_point_2)
 
-hf_p5_rec_point_1 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+(wing_section_chord_length[4]*helping_foam_mold_ratio),profile_5_y_cordinates[np.argmin(profile_5_x_cordinates)],wing_section_y_cordinates[4])
-hf_p5_rec_point_2 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+(wing_section_chord_length[4]*helping_foam_mold_ratio*5),profile_5_y_cordinates[np.argmin(profile_5_x_cordinates)]+foam_thickness,wing_section_y_cordinates[4])
+hf_p5_rec_point_1 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+(wing_section_chord_length[4]*helping_foam_mold_ratio_p5),profile_5_y_cordinates[np.argmin(profile_5_x_cordinates)],wing_section_y_cordinates[4])
+hf_p5_rec_point_2 = geompy.MakeVertex(np.min(profile_5_x_cordinates)+(wing_section_chord_length[4]*helping_foam_mold_ratio_p5*5),profile_5_y_cordinates[np.argmin(profile_5_x_cordinates)]+foam_thickness,wing_section_y_cordinates[4])
 hf_p5_rec = MakeRectTwoPnt(hf_p5_rec_point_1,hf_p5_rec_point_2)
 
-hf_p6_rec_point_1 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+(wing_section_chord_length[5]*helping_foam_mold_ratio),profile_6_y_cordinates[np.argmin(profile_6_x_cordinates)],wing_section_y_cordinates[5])
-hf_p6_rec_point_2 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+(wing_section_chord_length[5]*helping_foam_mold_ratio*5),profile_6_y_cordinates[np.argmin(profile_6_x_cordinates)]+foam_thickness,wing_section_y_cordinates[5])
+hf_p6_rec_point_1 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+(wing_section_chord_length[5]*helping_foam_mold_ratio_p6),profile_6_y_cordinates[np.argmin(profile_6_x_cordinates)],wing_section_y_cordinates[5])
+hf_p6_rec_point_2 = geompy.MakeVertex(np.min(profile_6_x_cordinates)+(wing_section_chord_length[5]*helping_foam_mold_ratio_p6*5),profile_6_y_cordinates[np.argmin(profile_6_x_cordinates)]+foam_thickness,wing_section_y_cordinates[5])
 hf_p6_rec = MakeRectTwoPnt(hf_p6_rec_point_1,hf_p6_rec_point_2)
 
 

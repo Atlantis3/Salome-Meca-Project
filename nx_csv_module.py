@@ -67,5 +67,18 @@ for count,value in enumerate (profile_paths):
         globals()[f'profile_{count+1}_y_cordinates'].append(y_value*wing_section_chord_length[count])
 
 
+points = []
+for count,value in enumerate(profile_1_x_cordinates):
+    point = workPart.Points.CreatePoint(NXOpen.Point3d(profile_1_x_cordinates[count], profile_1_y_cordinates[count], wing_section_y_cordinates[0]))
+    points.append(point)
+    point.SetVisibility(NXOpen.SmartObject.VisibilityOption.Visible)
 
+# Create lines between the points
+lines = []
+for i in range(len(points)):
+    start_point = points[i]
+    end_point = points[(i + 1) % len(points)]  # Loop back to the first point
+    line = workPart.Curves.CreateLine(start_point, end_point)
+    line.SetVisibility(NXOpen.SmartObject.VisibilityOption.Visible)
+    lines.append(line)
 
